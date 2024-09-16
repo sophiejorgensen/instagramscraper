@@ -2,6 +2,7 @@ import json
 import httpx
 from typing import Dict
 from urllib.parse import quote
+import array
 
 INSTAGRAM_APP_ID = "936619743392459"  # this is the public app id for instagram.com
 
@@ -18,6 +19,7 @@ client = httpx.Client(
     }
 )
 
+# single user support
 def scrape_user(username: str):
     """Scrape Instagram user's data"""
     result = client.get(
@@ -26,8 +28,29 @@ def scrape_user(username: str):
     data = json.loads(result.content)
     return data["data"]["user"]
 
+# multi user support
+def scrape_users(usernames):
+    userdata = []
+    print(usernames)
+    for username in usernames:
+        result = client.get(
+            f"https://i.instagram.com/api/v1/users/web_profile_info/?username={username}",
+        )
+        data = json.loads(result.content)
+        userdata.append(data["data"]["user"])
+    return userdata
+
 # print(scrape_user("travisscott"))
+
+'''
 userinfo = scrape_user("yeat")
 
 with open("yeat.json", "w",encoding="utf-8") as f:
-    json.dump(userinfo, f, indent=2, ensure_ascii=False)
+    json.dump(userinfo, f, indent=2, ensure_ascii=False)'''
+
+count = 2
+for user in scrape_users(["yeat", "kencarson"]):
+    filename = f"user{count}.json"
+    with open(filename, "w",encoding="utf-8") as f:
+        json.dump(user, f, indent=2, ensure_ascii=False)
+    count += 1
